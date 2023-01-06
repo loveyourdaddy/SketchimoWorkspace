@@ -10,7 +10,6 @@ Unity 2020.3.30f1
 
 ## Installation
 1. Import [Dependencies](#dependencies) below
-2. Change the 'Read/Write Enabled' option of 'smpl_clone.fbx' and 'smpl.fbx' in 'Assets/Resources/Model' to true.
 
 ## Pull Request
 1. Make your own branch or fork this repository
@@ -23,26 +22,3 @@ Unity 2020.3.30f1
 ## Coding Standard
 
 ## Shortcut Key
-
-### RoomReconstruction
-- 'T' for moving
-
-## References
-[Original Structure](Docs/OriginalStructure.md)
-
-[API Documentation Website](https://sites.google.com/view/vmlkocca/home/api-reference?authuser=0)
-
-## Dependencies
-[Pack Gesta Furniture](https://assetstore.unity.com/packages/3d/props/furniture/pack-gesta-furniture-1-28237)
-
-[Motion Module](https://github.com/KAIST-VML/MotionModule)
-   - `Work/01-Projects/KOCCA_AICreationPlatform/KOCCA_자율진화형_창작플랫폼_3차년도/00_Data/MotionModule.unitypackage`
-
-[Model Data]
-   - 'Work/01-Projects/KOCCA_AICreationPlatform/KOCCA_자율진화형_창작플랫폼_3차년도/00_Data/ModelData.unitypackage'
-
-[Furniture Data]
-   - 'Work/01-Projects/KOCCA_AICreationPlatform/KOCCA_자율진화형_창작플랫폼_3차년도/00_Data/FurnitureData.unitypackage'
-
-[Room Data]
-   - 'Work/01-Projects/KOCCA_AICreationPlatform/KOCCA_자율진화형_창작플랫폼_3차년도/00_Data/RoomAssets.unitypackage'
