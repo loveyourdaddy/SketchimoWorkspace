@@ -8,10 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EditScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
-    path: Assets/Scenes/SelectionScene.unity
-    guid: 0ae5406d36c45794085bf79a109f276c
-  - enabled: 1
-    path: Assets/Scenes/RoomReconstruction.unity
-    guid: e71ea23d90e45824fbe2b9174732c615
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   m_configObjects: {}
