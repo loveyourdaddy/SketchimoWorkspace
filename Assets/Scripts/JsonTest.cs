@@ -16,8 +16,7 @@ namespace Sketchimo.Models
         public string motionName;
         public int totalFrame;
         public float fps = 60;
-        // public Quaternion[] data;  
-        public Quaternion[][] data;  
+        public Quaternion[] data;  // []
 
         // public void Init(MotionData info)
         // {
@@ -50,30 +49,28 @@ namespace Sketchimo.Models
             int numJoint = refMotion.data[0].joints.Length;
 
             Motion motion = new Motion();
-            int quatDim = 4;
+            // int quatDim = 4;
+            motion.data = new Quaternion[numPose * numJoint];
 
             motion.characterName = refMotion.characterName;
             motion.motionName = refMotion.motionName;
             motion.totalFrame = refMotion.totalFrame;
             var refPoses = refMotion.data; // List<PoseData> 이걸 못찾는다고? var은 되는데?
 
-            for (int j=0; j<numPose; j++) 
+            for (int j=0; j<numPose; j++)
             {
                 var refPose = refPoses[j];
-                Quaternion[] pose = new Quaternion[numJoint];
+                // Quaternion[] pose = new Quaternion[numJoint];
                 for(int i=0; i<numJoint; i++)
                 {
                     var refJoint = refPose.joints[i];
                     Quaternion rot = refJoint.rotation;
-                    pose[i] = rot;
+                    motion.data[j * numJoint + i] = rot;
                 }
-                motion.data[j] = pose;
-
-                // motion.data.Add(pose);
             }
 
-            string json = JsonUtility.ToJson(motion);
-            File.WriteAllText(Application.dataPath + "/MotionData.json", json);
+            string jsonFile = JsonUtility.ToJson(motion);
+            File.WriteAllText(Application.dataPath + "/MotionData.json", jsonFile);
             motion.printData();
         }
 
