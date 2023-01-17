@@ -37,9 +37,33 @@ namespace Sketchimo.Models
     {
         // Start is called before the first frame update
         public MotionInfo motionInfo;
-        void Start()
+        void Awake()
         {
-            SaveJson();
+            // SaveJson();
+            var jsonMotion = ParseJson();
+                        
+            // Set motionInfo(MotionData class) from motionData
+            Utils.MotionData motionData = motionInfo.motion; // new Utils.MotionData();
+            motionData.characterName = jsonMotion.characterName;
+            motionData.motionName = jsonMotion.motionName;
+            motionData.totalFrame = jsonMotion.totalFrame;
+            motionData.fps = jsonMotion.fps;
+
+            motionData.data = new List<Utils.PoseData> (); // jsonMotion.totalFrame
+            int numberOfJoint = (int) (jsonMotion.data.Length / jsonMotion.totalFrame);
+            for (var i = 0; i < jsonMotion.totalFrame; i++)
+            {
+                Utils.PoseData pose = new Utils.PoseData();
+                // Utils.PoseData pose = motionData.data[i];
+                pose.joints = new Utils.JointData[numberOfJoint];
+                for (var j = 0; j < numberOfJoint; j++)
+                {
+                    // Utils.JointData joint = pose.joints[j];
+                    pose.joints[j].rotation = jsonMotion.data[i * numberOfJoint + j];
+                }
+                motionData.data.Add(pose);
+            }            
+            // motionInfo.motion = motionData;
         }
 
         public void SaveJson()
@@ -49,21 +73,19 @@ namespace Sketchimo.Models
             int numJoint = refMotion.data[0].joints.Length;
 
             Motion motion = new Motion();
-            // int quatDim = 4;
             motion.data = new Quaternion[numPose * numJoint];
 
             motion.characterName = refMotion.characterName;
             motion.motionName = refMotion.motionName;
             motion.totalFrame = refMotion.totalFrame;
-            var refPoses = refMotion.data; // List<PoseData> 이걸 못찾는다고? var은 되는데?
+            List<Utils.PoseData> refPoses = refMotion.data; 
 
             for (int j=0; j<numPose; j++)
             {
-                var refPose = refPoses[j];
-                // Quaternion[] pose = new Quaternion[numJoint];
+                Utils.PoseData refPose = refPoses[j];
                 for(int i=0; i<numJoint; i++)
                 {
-                    var refJoint = refPose.joints[i];
+                    Utils.JointData refJoint = refPose.joints[i];
                     Quaternion rot = refJoint.rotation;
                     motion.data[j * numJoint + i] = rot;
                 }
@@ -74,10 +96,13 @@ namespace Sketchimo.Models
             motion.printData();
         }
 
-        // Update is called once per frame
-        void Update()
+        public Motion ParseJson()
         {
-
+            string path = "output.json";
+            string jsonString = File.ReadAllText(path); 
+            Motion motion = JsonUtility.FromJson<Motion>(jsonString);
+            return motion;
         }
+
     }
 }

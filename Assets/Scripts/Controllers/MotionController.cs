@@ -13,10 +13,15 @@ public class MotionController : MonoBehaviour
     public int CurrentFrame = 0;
     public int TotalFrame = 0;
     public Action OnPlayStateChanged;
+    public JsonTest jsonTest;
 
 	public void Start()
     {
-        _motionModel = GetComponent<MotionInfo>();
+        // _motionModel = GetComponent<MotionInfo>();
+        // _motionModel = jsonTest.motionInfo;
+        var tmp = GetComponent<JsonTest>();
+        _motionModel = tmp.motionInfo;
+
         if (SelectionController.currentMotion != null)
             _motionModel.motion = SelectionController.currentMotion;
 
@@ -29,7 +34,7 @@ public class MotionController : MonoBehaviour
 
         TotalFrame = _motionModel.GetTotalFrame();
         SetFrameFromSlider(0);
-    }
+    } 
 
     public void SetMotionFrame(int frame)
     {
