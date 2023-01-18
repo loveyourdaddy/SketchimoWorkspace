@@ -18,9 +18,8 @@ public class MotionController : MonoBehaviour
 	public void Start()
     {
         // _motionModel = GetComponent<MotionInfo>();
-        // _motionModel = jsonTest.motionInfo;
-        var tmp = GetComponent<JsonTest>();
-        _motionModel = tmp.motionInfo;
+        var jsonTest = GetComponent<JsonTest>();
+        _motionModel = jsonTest.motionInfo;
 
         if (SelectionController.currentMotion != null)
             _motionModel.motion = SelectionController.currentMotion;

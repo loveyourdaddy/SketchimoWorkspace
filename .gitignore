@@ -80,3 +80,5 @@ UserSettings/EditorUserSettings.asset
 Assets/Furniture_ges1*
 Assets/output/SMPLX*
 Assets/output/*
+Assets/*.json
+Assets/*.json.meta
