@@ -2461,6 +2461,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   motionInfo: {fileID: 848955389}
+  man: {fileID: 866673125}
 --- !u!4 &1903138904 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5545532018093514844, guid: f4890d0a1c2a7c64b87c4890d5d854ac, type: 3}

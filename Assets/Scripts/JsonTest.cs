@@ -16,15 +16,27 @@ namespace Sketchimo.Models
         public float fps = 60;
         public Quaternion[] rotation;
         public Vector3[] position;
+        public Vector3[] vertexPosition; 
+        
+
     }
 
     public class JsonTest : MonoBehaviour
     {
         public MotionInfo motionInfo;
+        public GameObject man;
+        private Vector3[] vertexPosition;
+        // private int totalFrame = 0;
+        // private int totalVertex = 0;
+        // private int count = 0;
+        // private MeshFilter mf;
+        private SkinnedMeshRenderer skin;
+        private Mesh mesh;
+        private JsonMotion jsonMotion;
         void Awake()
-        {
-            // SaveJson();
-            UpdateMotionFromJson();
+        {         
+            SaveJson(); // save motion information 
+            // UpdateMotionFromJson();
         }
 
         public void SaveJson()
@@ -33,13 +45,14 @@ namespace Sketchimo.Models
             int numPose = refMotion.data.Count;
             int numJoint = refMotion.data[0].joints.Length;
 
-            JsonMotion motion = new JsonMotion();
-            motion.rotation = new Quaternion[numPose * numJoint];
-            motion.position = new Vector3[numPose * numJoint];
+            jsonMotion = new JsonMotion();
+            jsonMotion.rotation = new Quaternion[numPose * numJoint];
+            jsonMotion.position = new Vector3[numPose * numJoint];
 
-            motion.characterName = refMotion.characterName;
-            motion.motionName = refMotion.motionName;
-            motion.totalFrame = refMotion.totalFrame;
+            jsonMotion.characterName = refMotion.characterName;
+            jsonMotion.motionName = refMotion.motionName;
+            jsonMotion.totalFrame = refMotion.totalFrame;
+            // totalFrame = jsonMotion.totalFrame;
             List<Utils.PoseData> refPoses = refMotion.data;
 
             for (int i = 0; i < numPose; i++)
@@ -48,13 +61,47 @@ namespace Sketchimo.Models
                 for (int j = 0; j < numJoint; j++)
                 {
                     Utils.JointData refJoint = refPose.joints[j];
-                    motion.rotation[i * numJoint + j] = refJoint.rotation;
-                    motion.position[i * numJoint + j] = refJoint.position;
+                    jsonMotion.rotation[i * numJoint + j] = refJoint.rotation;
+                    jsonMotion.position[i * numJoint + j] = refJoint.position;
                 }
             }
 
-            string jsonFile = JsonUtility.ToJson(motion);
-            File.WriteAllText(Application.dataPath + "/UnityOutput.json", jsonFile);
+            // save mesh information 
+            skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
+            mesh = skin.sharedMesh;
+            jsonMotion.vertexPosition = new Vector3[mesh.vertexCount * motionInfo.GetTotalFrame()];
+
+            // Set motion start 
+            GetComponent<Controllers.MotionController>().SetPlayState(0);
+        }
+
+        /*
+        1. let character play for 1 loop
+        2. save mesh vertex position in update function 
+        */
+
+        public void Update()
+        {
+            // if frame == totalFrame, set stop and save mesh data 
+            if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame())
+            {
+                // set stop
+                // motionInfo.SetCurrentPlay(PlayState.Pause);
+                GetComponent<Controllers.MotionController>().SetPlayState(1);
+
+                // save json
+                string jsonFile = JsonUtility.ToJson(jsonMotion);
+                File.WriteAllText(Application.dataPath + "/UnityOutput.json", jsonFile);
+            }
+
+            // // save mesh data 
+            int count = mesh.vertexCount;
+            int numberofVertex = mesh.vertexCount;
+            Debug.Log(motionInfo.GetCurrentFrame().ToString());
+            for (int i = 0; i < count; i++)
+            {
+                jsonMotion.vertexPosition[numberofVertex * motionInfo.GetCurrentFrame() + i] = mesh.vertices[i];
+            }
         }
 
         // Update motionInfo(MotionData class) from motionData

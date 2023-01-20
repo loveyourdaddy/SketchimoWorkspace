@@ -13,7 +13,7 @@ public class MotionController : MonoBehaviour
     public int CurrentFrame = 0;
     public int TotalFrame = 0;
     public Action OnPlayStateChanged;
-    public JsonTest jsonTest;
+    private JsonTest jsonTest;
 
 	public void Start()
     {
