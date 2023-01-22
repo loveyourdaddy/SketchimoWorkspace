@@ -16,7 +16,7 @@ namespace Sketchimo.Models
         public float fps = 60;
         public Quaternion[] rotation;
         public Vector3[] position;
-        public Vector3[] vertexPosition; 
+        public Vector3[] vertices; 
         
 
     }
@@ -25,17 +25,13 @@ namespace Sketchimo.Models
     {
         public MotionInfo motionInfo;
         public GameObject man;
-        private Vector3[] vertexPosition;
-        // private int totalFrame = 0;
-        // private int totalVertex = 0;
-        // private int count = 0;
-        // private MeshFilter mf;
         private SkinnedMeshRenderer skin;
         private Mesh mesh;
         private JsonMotion jsonMotion;
         void Awake()
         {         
-            SaveJson(); // save motion information 
+            // ONLY CHANGE THIS
+            SaveJson();
             // UpdateMotionFromJson();
         }
 
@@ -52,7 +48,6 @@ namespace Sketchimo.Models
             jsonMotion.characterName = refMotion.characterName;
             jsonMotion.motionName = refMotion.motionName;
             jsonMotion.totalFrame = refMotion.totalFrame;
-            // totalFrame = jsonMotion.totalFrame;
             List<Utils.PoseData> refPoses = refMotion.data;
 
             for (int i = 0; i < numPose; i++)
@@ -69,24 +64,17 @@ namespace Sketchimo.Models
             // save mesh information 
             skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
             mesh = skin.sharedMesh;
-            jsonMotion.vertexPosition = new Vector3[mesh.vertexCount * motionInfo.GetTotalFrame()];
+            jsonMotion.vertices = new Vector3[mesh.vertexCount  * motionInfo.GetTotalFrame()]; 
 
             // Set motion start 
             GetComponent<Controllers.MotionController>().SetPlayState(0);
         }
 
-        /*
-        1. let character play for 1 loop
-        2. save mesh vertex position in update function 
-        */
-
         public void Update()
         {
-            // if frame == totalFrame, set stop and save mesh data 
-            if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame())
+            if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1)
             {
                 // set stop
-                // motionInfo.SetCurrentPlay(PlayState.Pause);
                 GetComponent<Controllers.MotionController>().SetPlayState(1);
 
                 // save json
@@ -94,17 +82,17 @@ namespace Sketchimo.Models
                 File.WriteAllText(Application.dataPath + "/UnityOutput.json", jsonFile);
             }
 
-            // // save mesh data 
+            // update data 
             int count = mesh.vertexCount;
             int numberofVertex = mesh.vertexCount;
             Debug.Log(motionInfo.GetCurrentFrame().ToString());
             for (int i = 0; i < count; i++)
             {
-                jsonMotion.vertexPosition[numberofVertex * motionInfo.GetCurrentFrame() + i] = mesh.vertices[i];
+                jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame() - 1) + i] = mesh.vertices[i];
             }
         }
 
-        // Update motionInfo(MotionData class) from motionData
+        // Update unity motion (motionInfo) from python
         public void UpdateMotionFromJson()
         {
             // parse json 
