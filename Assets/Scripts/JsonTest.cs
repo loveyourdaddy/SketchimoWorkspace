@@ -13,26 +13,66 @@ namespace Sketchimo.Models
         public string characterName;
         public string motionName;
         public int totalFrame;
+        public int numberofVertex;
         public float fps = 60;
         public Quaternion[] rotation;
         public Vector3[] position;
         public Vector3[] vertices; 
-        
-
     }
 
     public class JsonTest : MonoBehaviour
     {
-        public MotionInfo motionInfo;
+        public MotionInfo motionInfo; 
         public GameObject man;
         private SkinnedMeshRenderer skin;
         private Mesh mesh;
         private JsonMotion jsonMotion;
+        private bool isUpdated = false;
+        public BoxCollider box;
         void Awake()
         {         
+            // Get aabb and vertex indices 
+            GetVertexIndices();
+
             // ONLY CHANGE THIS
             SaveJson();
             // UpdateMotionFromJson();
+        }
+
+        void printRecursive(Transform currBone)
+        {
+            for (int i = 0; i < currBone.childCount; i++)
+            {
+                Debug.Log(currBone.name);
+                Debug.Log(currBone.transform.position.ToString("F4"));
+                var childBone = currBone.GetChild(i);
+                printRecursive(childBone);
+                Debug.Log(i);
+            }
+        }
+
+        // void Start()
+        // {
+
+        // }
+        public void GetVertexIndices()
+        {
+
+            // Get aabb bound
+            Vector3 maxBound = box.bounds.max;
+            Vector3 minBound = box.bounds.min;
+
+            // Get vertices in bound
+            Transform ybot = man.transform.GetChild(0);
+            SkinnedMeshRenderer skin = ybot.GetComponentInChildren<SkinnedMeshRenderer>();
+
+            // mesh in T pose 
+            Mesh mesh = skin.sharedMesh;
+            // mesh.vertices;
+
+            // check it is T pose 
+            // Transform root = ybot.Find("mixamorig:Hips");
+            // printRecursive(root);
         }
 
         public void SaveJson()
@@ -64,6 +104,7 @@ namespace Sketchimo.Models
             // save mesh information 
             skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
             mesh = skin.sharedMesh;
+            jsonMotion.numberofVertex = mesh.vertexCount;
             jsonMotion.vertices = new Vector3[mesh.vertexCount  * motionInfo.GetTotalFrame()]; 
 
             // Set motion start 
@@ -71,32 +112,82 @@ namespace Sketchimo.Models
         }
 
         public void Update()
+        {            
+            // if(GetComponent<Controllers.MotionController>().CurrentPlay == 0)
+            // {
+            //     int count = mesh.vertexCount;
+            //     int numberofVertex = mesh.vertexCount;
+            //     for (int i = 0; i < count; i++)
+            //     {
+            //         jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame() - 1) + i] = mesh.vertices[i];
+            //     }
+
+            //     if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1) // && isUpdated == false
+            //     {
+            //         Debug.Log("Total frame: " + motionInfo.GetTotalFrame().ToString());
+            //         Debug.Log(motionInfo.GetCurrentFrame().ToString());
+
+            //         // set stop
+            //         GetComponent<Controllers.MotionController>().SetPlayState(1);
+
+            //         // save json
+            //         string jsonFile = JsonUtility.ToJson(jsonMotion);
+            //         File.WriteAllText(Application.dataPath + "/Json/UnityOutput_Tpose.json", jsonFile);
+            //         // isUpdated = true;
+            //     }
+            // }
+
+            // find hand joint 
+            // Transform hip = man.transform.GetChild(0).transform.GetChild(2); // LeftHand
+            // var leftHand = hip.Find("mixamorig:Spine/mixamorig:Spine1/mixamorig:Spine2/mixamorig:LeftShoulder/mixamorig:LeftArm/mixamorig:LeftForeArm/mixamorig:LeftHand");
+            // // var tmmmp = leftHand.gameObject.GetComponent<>;
+            
+            // Vector3 center = leftHand.transform.position;
+            // Vector3 extents = Vector3.one;
+
+            // //find position of last vertex index 
+            // // 가장 오른쪽에 있는 vertex index을 찾아보자. 
+            // Transform ybot_trf = man.transform.GetChild(0);
+            // Transform alpha_surface_trf = ybot_trf.GetChild(0);
+            // var render = alpha_surface_trf.GetComponent<SkinnedMeshRenderer>();
+            // var mesh = alpha_surface_trf.GetComponent<Mesh>();
+
+            // // find min x 
+            // var verteices = mesh.vertices;
+            // float min_x = 10;
+            // int min_index = 0;
+            // for(int i=0; i<mesh.vertexCount; i++)
+            // {
+            //     if(min_x < verteices[i].x)
+            //     {
+            //         min_x = verteices[i].x;
+            //         min_index = i;
+            //     }
+            // }
+
+            // // define bounding box 
+            // Bounds bounds = new Bounds(center, extents);
+        }
+
+        void OnDrawGizmos()
         {
-            if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1)
-            {
-                // set stop
-                GetComponent<Controllers.MotionController>().SetPlayState(1);
+            // bounds.center = center;
 
-                // save json
-                string jsonFile = JsonUtility.ToJson(jsonMotion);
-                File.WriteAllText(Application.dataPath + "/UnityOutput.json", jsonFile);
-            }
 
-            // update data 
-            int count = mesh.vertexCount;
-            int numberofVertex = mesh.vertexCount;
-            Debug.Log(motionInfo.GetCurrentFrame().ToString());
-            for (int i = 0; i < count; i++)
-            {
-                jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame() - 1) + i] = mesh.vertices[i];
-            }
+            // find vertices index
+
+
+            // Bounds bounds = render.bounds;
+            // Gizmos.matrix = Matrix4x4.identity;
+            // Gizmos.color = Color.blue;
+            // Gizmos.DrawWireCube(bounds.center, bounds.extents*2);
         }
 
         // Update unity motion (motionInfo) from python
         public void UpdateMotionFromJson()
         {
             // parse json 
-            string path = "Assets/PythonOutput.json";
+            string path = "Assets/Json/PythonOutput.json";
             string jsonString = File.ReadAllText(path);
             JsonMotion jsonMotion = JsonUtility.FromJson<JsonMotion>(jsonString);
 
