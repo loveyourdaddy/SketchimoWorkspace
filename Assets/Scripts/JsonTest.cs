@@ -17,20 +17,24 @@ namespace Sketchimo.Models
         public float fps = 60;
         public Quaternion[] rotation;
         public Vector3[] position;
-        public Vector3[] vertices; 
+        public Vector3[] vertices;
+        public int[] vertexIndicesArray;
     }
 
     public class JsonTest : MonoBehaviour
     {
-        public MotionInfo motionInfo; 
+        public MotionInfo motionInfo;
         public GameObject man;
         private SkinnedMeshRenderer skin;
         private Mesh mesh;
         private JsonMotion jsonMotion;
         private bool isUpdated = false;
         public BoxCollider box;
+        // public int vertexIndices[];
+        public List<int> vertexIndices;
+        public int[] vertexIndicesArray;
         void Awake()
-        {         
+        {
             // Get aabb and vertex indices 
             GetVertexIndices();
 
@@ -73,11 +77,26 @@ namespace Sketchimo.Models
             // check it is T pose 
             // Transform root = ybot.Find("mixamorig:Hips");
             // printRecursive(root);
+
+            // get vertices indices 
+            // bound안에 있는 index을 리스트 
+
+            for (int i = 0; i < mesh.vertexCount; i++)
+            {
+                if (maxBound.x > mesh.vertices[i].x && minBound.x < mesh.vertices[i].x
+                    && maxBound.y > mesh.vertices[i].y && minBound.y < mesh.vertices[i].y
+                    && maxBound.z > mesh.vertices[i].z && minBound.z < mesh.vertices[i].z)
+                {
+                    vertexIndices.Add(i);
+                }
+            }
+
+            vertexIndicesArray = vertexIndices.ToArray();
         }
 
         public void SaveJson()
         {
-            var refMotion = motionInfo.refMotion; 
+            var refMotion = motionInfo.refMotion;
             int numPose = refMotion.data.Count;
             int numJoint = refMotion.data[0].joints.Length;
 
@@ -105,48 +124,50 @@ namespace Sketchimo.Models
             skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
             mesh = skin.sharedMesh;
             jsonMotion.numberofVertex = mesh.vertexCount;
-            jsonMotion.vertices = new Vector3[mesh.vertexCount  * motionInfo.GetTotalFrame()]; 
+            jsonMotion.vertices = new Vector3[mesh.vertexCount * motionInfo.GetTotalFrame()];
+            jsonMotion.vertexIndicesArray = vertexIndicesArray;
 
             // Set motion start 
             GetComponent<Controllers.MotionController>().SetPlayState(0);
         }
 
         public void Update()
-        {            
-            // if(GetComponent<Controllers.MotionController>().CurrentPlay == 0)
-            // {
-            //     int count = mesh.vertexCount;
-            //     int numberofVertex = mesh.vertexCount;
-            //     for (int i = 0; i < count; i++)
-            //     {
-            //         jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame() - 1) + i] = mesh.vertices[i];
-            //     }
+        {
+            if(GetComponent<Controllers.MotionController>().CurrentPlay == 0)
+            {
+                int count = mesh.vertexCount;
+                int numberofVertex = mesh.vertexCount;
+                Debug.Log("frame: " + motionInfo.GetCurrentFrame());
+                for (int i = 0; i < count; i++)
+                {
+                    jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame()) + i] = mesh.vertices[i]; // - 1
+                }
 
-            //     if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1) // && isUpdated == false
-            //     {
-            //         Debug.Log("Total frame: " + motionInfo.GetTotalFrame().ToString());
-            //         Debug.Log(motionInfo.GetCurrentFrame().ToString());
+                if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1) // && isUpdated == false
+                {
+                    Debug.Log("Total frame: " + motionInfo.GetTotalFrame().ToString());
+                    Debug.Log(motionInfo.GetCurrentFrame().ToString());
 
-            //         // set stop
-            //         GetComponent<Controllers.MotionController>().SetPlayState(1);
+                    // set stop
+                    GetComponent<Controllers.MotionController>().SetPlayState(1);
 
-            //         // save json
-            //         string jsonFile = JsonUtility.ToJson(jsonMotion);
-            //         File.WriteAllText(Application.dataPath + "/Json/UnityOutput_Tpose.json", jsonFile);
-            //         // isUpdated = true;
-            //     }
-            // }
+                    // save json
+                    string jsonFile = JsonUtility.ToJson(jsonMotion);
+                    File.WriteAllText(Application.dataPath + "/Json/UnityOutput_Tpose.json", jsonFile);
+                    // isUpdated = true;
+                }
+            }
 
             // find hand joint 
             // Transform hip = man.transform.GetChild(0).transform.GetChild(2); // LeftHand
             // var leftHand = hip.Find("mixamorig:Spine/mixamorig:Spine1/mixamorig:Spine2/mixamorig:LeftShoulder/mixamorig:LeftArm/mixamorig:LeftForeArm/mixamorig:LeftHand");
             // // var tmmmp = leftHand.gameObject.GetComponent<>;
-            
+
             // Vector3 center = leftHand.transform.position;
             // Vector3 extents = Vector3.one;
 
             // //find position of last vertex index 
-            // // 가장 오른쪽에 있는 vertex index을 찾아보자. 
+            // // 가장 오른쪽에 있는 vertex index을 찾아보자. -> python
             // Transform ybot_trf = man.transform.GetChild(0);
             // Transform alpha_surface_trf = ybot_trf.GetChild(0);
             // var render = alpha_surface_trf.GetComponent<SkinnedMeshRenderer>();
@@ -164,9 +185,6 @@ namespace Sketchimo.Models
             //         min_index = i;
             //     }
             // }
-
-            // // define bounding box 
-            // Bounds bounds = new Bounds(center, extents);
         }
 
         void OnDrawGizmos()
@@ -192,13 +210,13 @@ namespace Sketchimo.Models
             JsonMotion jsonMotion = JsonUtility.FromJson<JsonMotion>(jsonString);
 
             // update motion 
-            Utils.MotionData motionData = motionInfo.motion; 
+            Utils.MotionData motionData = motionInfo.motion;
             motionData.characterName = jsonMotion.characterName;
             motionData.motionName = jsonMotion.motionName;
             motionData.totalFrame = jsonMotion.totalFrame;
             motionData.fps = jsonMotion.fps;
 
-            motionData.data = new List<Utils.PoseData>(); 
+            motionData.data = new List<Utils.PoseData>();
             int numberOfJoint = (int)(jsonMotion.rotation.Length / jsonMotion.totalFrame);
             for (var i = 0; i < jsonMotion.totalFrame; i++)
             {
