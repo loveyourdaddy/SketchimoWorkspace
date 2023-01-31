@@ -2,8 +2,9 @@
 {
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "Unity Editor",
+            "name": "Unity Editor (Unity)",
             "type": "unity",
             "request": "launch"
         },
