@@ -36,7 +36,7 @@ namespace Sketchimo.Models
         void Awake()
         {
             // Get aabb and vertex indices 
-            GetVertexIndices();
+            // GetVertexIndices();
 
             // ONLY CHANGE THIS
             SaveJson();
@@ -120,28 +120,28 @@ namespace Sketchimo.Models
                 }
             }
 
-            // save mesh information 
-            skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
-            mesh = skin.sharedMesh;
-            jsonMotion.numberofVertex = mesh.vertexCount;
-            jsonMotion.vertices = new Vector3[mesh.vertexCount * motionInfo.GetTotalFrame()];
-            jsonMotion.vertexIndicesArray = vertexIndicesArray;
+            // // save mesh information 
+            // skin = man.transform.GetComponentInChildren<SkinnedMeshRenderer>();
+            // mesh = skin.sharedMesh;
+            // jsonMotion.numberofVertex = mesh.vertexCount;
+            // jsonMotion.vertices = new Vector3[mesh.vertexCount * motionInfo.GetTotalFrame()];
+            // jsonMotion.vertexIndicesArray = vertexIndicesArray;
 
-            // Set motion start 
-            GetComponent<Controllers.MotionController>().SetPlayState(0);
+            // // Set motion start 
+            // GetComponent<Controllers.MotionController>().SetPlayState(0);
         }
 
         public void Update()
         {
             if(GetComponent<Controllers.MotionController>().CurrentPlay == 0)
             {
-                int count = mesh.vertexCount;
-                int numberofVertex = mesh.vertexCount;
+            //     int count = mesh.vertexCount;
+            //     int numberofVertex = mesh.vertexCount;
                 Debug.Log("frame: " + motionInfo.GetCurrentFrame());
-                for (int i = 0; i < count; i++)
-                {
-                    jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame()) + i] = mesh.vertices[i]; // - 1
-                }
+                // for (int i = 0; i < count; i++)
+                // {
+                //     jsonMotion.vertices[numberofVertex * (motionInfo.GetCurrentFrame()) + i] = mesh.vertices[i]; // - 1
+                // }
 
                 if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1) // && isUpdated == false
                 {
@@ -153,7 +153,7 @@ namespace Sketchimo.Models
 
                     // save json
                     string jsonFile = JsonUtility.ToJson(jsonMotion);
-                    File.WriteAllText(Application.dataPath + "/Json/UnityOutput_Tpose.json", jsonFile);
+                    File.WriteAllText(Application.dataPath + "/Json/UnityOutput_clapping.json", jsonFile); // UnityOutput_Tpose
                     // isUpdated = true;
                 }
             }
