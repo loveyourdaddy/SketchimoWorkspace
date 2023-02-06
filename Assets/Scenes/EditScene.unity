@@ -356,12 +356,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 263080087}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c275f2b99608b7cc182ef4edfc17010d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  box: {fileID: 0}
+  box: {fileID: 263080090}
+  jsonTest: {fileID: 1863075130}
+  vertexIndices: 
 --- !u!1 &307422073
 GameObject:
   m_ObjectHideFlags: 0
@@ -3439,7 +3441,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   motionInfo: {fileID: 848955389}
   man: {fileID: 703058808}
+  jsonMotion:
+    characterName: 
+    motionName: 
+    totalFrame: 0
+    collisionFrame: 0
+    numberofVertex: 0
+    fps: 60
+    rotation: []
+    position: []
+    vertices: []
+    vertexIndicesArray0: 
+    vertexIndicesArray1: 
   box: {fileID: 2051994022}
+  vertexIndicesArray0: 
+  vertexIndicesArray1: 
 --- !u!4 &1903138904 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5545532018093514844, guid: f4890d0a1c2a7c64b87c4890d5d854ac, type: 3}
@@ -3636,6 +3652,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   box: {fileID: 2051994022}
+  jsonTest: {fileID: 1863075130}
+  vertexIndices: 
 --- !u!1 &2086413226 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5545532018093514841, guid: f4890d0a1c2a7c64b87c4890d5d854ac, type: 3}
