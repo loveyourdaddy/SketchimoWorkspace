@@ -13,7 +13,7 @@ namespace Sketchimo.Models
         public string characterName;
         public string motionName;
         public int totalFrame;
-        public int[] collisionFrame;
+        public int[] collisionFrames;
         public int numberofVertex;
         public float fps = 60;
         public Quaternion[] rotation;

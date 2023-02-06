@@ -68,14 +68,9 @@ public class collsiion : MonoBehaviour
 
         // // run at last time 
         // if(motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1)
-        jsonTest.jsonMotion.collisionFrame = collisionFrames.ToArray();
+        jsonTest.jsonMotion.collisionFrames = collisionFrames.ToArray();
 
         // vertex pair 저장.
         // collision이 발생했을 때, vertex indices 사이에 가장 가까운 vertex을 찾자. 
-    }
-
-    void OnApplicatoinQuit()
-    {
-        jsonTest.jsonMotion.collisionFrame = collisionFrames.ToArray();
     }
 }
