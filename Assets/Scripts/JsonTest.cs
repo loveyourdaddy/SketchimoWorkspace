@@ -10,33 +10,44 @@ namespace Sketchimo.Models
     [System.Serializable]
     public class JsonMotion
     {
+        // character infomation 
         public string characterName;
+
+        // motion infomation 
         public string motionName;
         public int totalFrame;
-        public int[] collisionFrames;
-        public int numberofVertex;
+
+        // public int numberofVertex;
         public float fps = 60;
         public Quaternion[] rotation;
         public Vector3[] position;
-        public Vector3[] vertices;
-        public int[] vertexIndicesArray0; // left hand indices 
-        public int[] vertexIndicesArray1; // right hand indices 
-        // public List: smallest distance의 pair vertex indices는 python에서 찾자. 
-        // 여기서 해도 되는데, python에서 어차피 vertex position을 들고 있어야해. 
+
+        // collision information
+        public int[] collisionFrames;
+        public Vector3 box1_maxBound;
+        public Vector3 box1_minBound;
+        public Vector3 box2_maxBound;
+        public Vector3 box2_minBound;
     }
 
     public class JsonTest : MonoBehaviour
     {
         public MotionInfo motionInfo;
         public GameObject man;
-        private SkinnedMeshRenderer skin;
-        private Mesh mesh;
         [HideInInspector]
         public JsonMotion jsonMotion;
-        private bool isUpdated = false;
-        public BoxCollider box;
-        public int[] vertexIndicesArray0;
-        public int[] vertexIndicesArray1;
+        // private bool isUpdated = false;
+
+        // aabb
+        [HideInInspector]
+        public Vector3 box1_maxBound;
+        [HideInInspector]
+        public Vector3 box1_minBound;
+        [HideInInspector]
+        public Vector3 box2_maxBound;
+        [HideInInspector]
+        public Vector3 box2_minBound;
+        
         void Awake()
         {
             SaveJson();
@@ -91,6 +102,8 @@ namespace Sketchimo.Models
                 // save json
                 string jsonFile = JsonUtility.ToJson(jsonMotion);
                 File.WriteAllText(Application.dataPath + "/Json/UnityOutput_clapping.json", jsonFile); // UnityOutput_Tpose
+
+                Debug.Log("Finish to save json");
             }
         }
 
