@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Sketchimo.Models
 {
-    // Class to save JsonMotion 
+    // Class to save JsonClass 
     [System.Serializable]
-    public class JsonMotion
+    public class JsonClass
     {
         // character infomation 
         public string characterName;
@@ -19,8 +19,16 @@ namespace Sketchimo.Models
 
         // public int numberofVertex;
         public float fps = 60;
+
+        // joint infomations
+        public int[] jointIndices;
+        public int[] parentIndices;
+        public string[] jointNames;
+
         public Quaternion[] rotation;
         public Vector3[] position;
+        public Vector3[] rootPos;
+        public Vector3[] boneOffsets;
 
         // collision information
         public int[] collisionFrames;
@@ -34,9 +42,9 @@ namespace Sketchimo.Models
     {
         public MotionInfo motionInfo;
         public GameObject man;
+        public CharInfo charInfo;
         [HideInInspector]
-        public JsonMotion jsonMotion;
-        // private bool isUpdated = false;
+        public JsonClass jsonClass;
 
         // aabb
         [HideInInspector]
@@ -47,11 +55,14 @@ namespace Sketchimo.Models
         public Vector3 box2_maxBound;
         [HideInInspector]
         public Vector3 box2_minBound;
-        
-        void Awake()
+
+        private bool is_save = false;
+        void Start()
         {
-            SaveJson();
-            // UpdateMotionFromJson();
+            if (is_save)
+                SaveJson();
+            else
+                UpdateMotionFromJson();
         }
 
         // unity -> python
@@ -62,24 +73,36 @@ namespace Sketchimo.Models
             int numPose = refMotion.data.Count;
             int numJoint = refMotion.data[0].joints.Length;
 
-            jsonMotion = new JsonMotion();
-            jsonMotion.rotation = new Quaternion[numPose * numJoint];
-            jsonMotion.position = new Vector3[numPose * numJoint];
+            jsonClass = new JsonClass();
+            jsonClass.characterName = refMotion.characterName;
+            jsonClass.motionName = refMotion.motionName;
+            jsonClass.totalFrame = refMotion.totalFrame;
+            jsonClass.rotation = new Quaternion[numPose * numJoint];
+            jsonClass.position = new Vector3[numPose * numJoint];
+            jsonClass.boneOffsets = new Vector3[numJoint];
+            jsonClass.jointIndices = new int[numJoint]; 
+            jsonClass.parentIndices = new int[numJoint];
+            jsonClass.jointNames = new string[numJoint];
 
-            jsonMotion.characterName = refMotion.characterName;
-            jsonMotion.motionName = refMotion.motionName;
-            jsonMotion.totalFrame = refMotion.totalFrame;
             List<Utils.PoseData> refPoses = refMotion.data;
-
             for (int i = 0; i < numPose; i++)
             {
                 Utils.PoseData refPose = refPoses[i];
                 for (int j = 0; j < numJoint; j++)
                 {
                     Utils.JointData refJoint = refPose.joints[j];
-                    jsonMotion.rotation[i * numJoint + j] = refJoint.rotation;
-                    jsonMotion.position[i * numJoint + j] = refJoint.position;
+                    jsonClass.rotation[i * numJoint + j] = refJoint.rotation;
+                    jsonClass.position[i * numJoint + j] = refJoint.position;
                 }
+            }
+            for (int j = 0; j < numJoint; j++)
+            {
+                Utils.PoseData pose = refPoses[0];
+                Utils.JointData joint = pose.joints[j];
+                jsonClass.jointIndices[j] = joint.jointIdx;
+                jsonClass.parentIndices[j] = joint.parentIdx;
+                jsonClass.jointNames[j] = joint.jointName;
+                jsonClass.boneOffsets[j] = charInfo.boneOffset[j];
             }
 
             // Set motion start 
@@ -89,52 +112,59 @@ namespace Sketchimo.Models
         public void Update()
         {
             // Save json when animation finish
-            // unity -> python
-            if (GetComponent<Controllers.MotionController>().CurrentPlay == 0 &&
-                motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1)
-            {
-                Debug.Log("Total frame: " + motionInfo.GetTotalFrame().ToString());
-                Debug.Log(motionInfo.GetCurrentFrame().ToString());
+            if (is_save)
+                if (GetComponent<Controllers.MotionController>().CurrentPlay == 0 &&
+                    motionInfo.GetCurrentFrame() >= motionInfo.GetTotalFrame() - 1)
+                {
+                    Debug.Log("Total frame: " + motionInfo.GetTotalFrame().ToString());
+                    Debug.Log(motionInfo.GetCurrentFrame().ToString());
 
-                // set stop
-                GetComponent<Controllers.MotionController>().SetPlayState(1);
+                    // set stop
+                    GetComponent<Controllers.MotionController>().SetPlayState(1);
 
-                // save json
-                string jsonFile = JsonUtility.ToJson(jsonMotion);
-                File.WriteAllText(Application.dataPath + "/Json/UnityOutput_clapping.json", jsonFile); // UnityOutput_Tpose
+                    // save json
+                    string jsonFile = JsonUtility.ToJson(jsonClass);
+                    File.WriteAllText(Application.dataPath + "/Json/source_clapping.json", jsonFile); // source_TPose
 
-                Debug.Log("Finish to save json");
-            }
+                    Debug.Log("Finish to save json");
+                }
         }
 
         // python -> unity
         public void UpdateMotionFromJson()
         {
             // parse json 
-            string path = "Assets/Json/PythonOutput.json";
+            string path = "Assets/Json/PythonOutput_clapping.json"; // PythonOutput_TPose
             string jsonString = File.ReadAllText(path);
-            JsonMotion jsonMotion = JsonUtility.FromJson<JsonMotion>(jsonString);
+            JsonClass jsonClass = JsonUtility.FromJson<JsonClass>(jsonString);
+
+            Debug.Log("Motion from python:" + path);
+
+            // reference motion
+            var refMotion = motionInfo.refMotion;
+            int numPose = refMotion.data.Count;
+            int numJoint = refMotion.data[0].joints.Length;
+            List<Utils.PoseData> refPoses = refMotion.data;
 
             // update motion 
             Utils.MotionData motionData = motionInfo.motion;
-            motionData.characterName = jsonMotion.characterName;
-            motionData.motionName = jsonMotion.motionName;
-            motionData.totalFrame = jsonMotion.totalFrame;
-            motionData.fps = jsonMotion.fps;
+            var totalFrame = numPose;
+            int numberOfJoint = numJoint;
 
-            motionData.data = new List<Utils.PoseData>();
-            int numberOfJoint = (int)(jsonMotion.rotation.Length / jsonMotion.totalFrame);
-            for (var i = 0; i < jsonMotion.totalFrame; i++)
+            for (var i = 0; i < totalFrame; i++)
             {
-                Utils.PoseData pose = new Utils.PoseData();
-                pose.joints = new Utils.JointData[numberOfJoint];
+                Utils.PoseData pose = refPoses[i];
                 for (var j = 0; j < numberOfJoint; j++)
                 {
-                    pose.joints[j].rotation = jsonMotion.rotation[i * numberOfJoint + j];
-                    pose.joints[j].position = jsonMotion.position[i * numberOfJoint + j];
+                    Quaternion globalRot = jsonClass.rotation[i * numberOfJoint + j];
+                    pose.joints[j].rotation = globalRot;
+                    Vector3 position = jsonClass.position[i * numberOfJoint + j];
+                    pose.joints[j].position = position;
                 }
-                motionData.data.Add(pose);
             }
+
+            // Set motion start 
+            GetComponent<Controllers.MotionController>().SetPlayState(0);
         }
     }
 }

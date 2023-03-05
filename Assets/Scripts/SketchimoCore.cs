@@ -512,7 +512,7 @@ public class SketchimoCore : MonoBehaviour
         //}
     }
 
-    List<Vector3> ForwardKinematics(Vector3 RootPos, List<Quaternion> LocalOrientation, PoseData pose)
+    public List<Vector3> ForwardKinematics(Vector3 RootPos, List<Quaternion> LocalOrientation, PoseData pose)
     {
         int len = LocalOrientation.Count;
         List<Vector3> WorldPositions = new List<Vector3>(new Vector3[len]);

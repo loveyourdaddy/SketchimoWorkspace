@@ -134,11 +134,11 @@ public class CharInfo : MonoBehaviour
     {
         _bones[0].transform.position = pose.joints[0].position;
         _bones[0].transform.rotation = pose.joints[0].rotation;
-
+        
+        var newRoot = pose.joints[0];
         for (var i = 1; i < _bones.Length; i++)
         {
             var bone = _bones[i];
-            var newRoot = pose.joints[0];
             var newBone = pose.joints[i];
 
             bone.transform.position = newRoot.position + newRoot.rotation * newBone.position;

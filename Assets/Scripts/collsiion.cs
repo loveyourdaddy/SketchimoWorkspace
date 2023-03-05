@@ -29,13 +29,13 @@ public class collsiion : MonoBehaviour
 
         if(this.name == "mixamorig:LeftHand") // left: 1
         {
-            jsonTest.jsonMotion.box1_maxBound = box.bounds.max;
-            jsonTest.jsonMotion.box1_minBound = box.bounds.min;
+            jsonTest.jsonClass.box1_maxBound = box.bounds.max;
+            jsonTest.jsonClass.box1_minBound = box.bounds.min;
         }
         else
         {
-            jsonTest.jsonMotion.box2_maxBound = box.bounds.max;
-            jsonTest.jsonMotion.box2_minBound = box.bounds.min;
+            jsonTest.jsonClass.box2_maxBound = box.bounds.max;
+            jsonTest.jsonClass.box2_minBound = box.bounds.min;
         }
 
     }
@@ -46,17 +46,17 @@ public class collsiion : MonoBehaviour
 
     }
 
-    void OnTriggerEnter(Collider collider)
+    void OnTriggerStay(Collider collider)
     {
         // var a = collision.contacts;
         var motionInfo = jsonTest.motionInfo;
         int collisionFrame = motionInfo.GetCurrentFrame();
         Debug.Log("collision detection at " + collisionFrame.ToString());
 
-        // jsonFile.jsonMotion.frame 저장        
+        // jsonFile.jsonClass.frame 저장        
         collisionFrames.Add(collisionFrame);
 
         // // run at last time 
-        jsonTest.jsonMotion.collisionFrames = collisionFrames.ToArray();
+        jsonTest.jsonClass.collisionFrames = collisionFrames.ToArray();
     }
 }
